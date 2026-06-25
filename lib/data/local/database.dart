@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:drift/drift.dart';
-
-import 'database_connection.dart';
+import 'package:drift/native.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
@@ -25,7 +27,8 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
-  Stream<List<CurrencyRate>> watchAllRates() => select(currencyRates).watch();
+  Stream<List<CurrencyRate>> watchAllRates() =>
+      select(currencyRates).watch();
 
   Future<void> upsertRates(List<CurrencyRatesCompanion> rows) async {
     await batch((b) => b.insertAllOnConflictUpdate(currencyRates, rows));
@@ -36,7 +39,9 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertSavedCurrency(String code) async {
     await delete(savedCurrencies).go();
-    await into(savedCurrencies).insert(SavedCurrenciesCompanion.insert(code: code));
+    await into(savedCurrencies).insert(
+      SavedCurrenciesCompanion.insert(code: code),
+    );
   }
 
   Future<DateTime?> getLastUpdated() async {
@@ -47,4 +52,12 @@ class AppDatabase extends _$AppDatabase {
     final row = await query.getSingleOrNull();
     return row?.read(currencyRates.updatedAt);
   }
+}
+
+LazyDatabase _openConnection() {
+  return LazyDatabase(() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = p.join(dir.path, 'currency_converter.db');
+    return NativeDatabase.createInBackground(File(file));
+  });
 }
