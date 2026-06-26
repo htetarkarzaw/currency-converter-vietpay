@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'di/injection.dart';
+import 'presentation/screens/home/home_screen.dart';
 import 'presentation/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -20,10 +21,7 @@ class CurrencyConverterApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: Scaffold(
-        appBar: AppBar(title:const Text('Currency Converter')),
-        body: const SizedBox.shrink(),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
