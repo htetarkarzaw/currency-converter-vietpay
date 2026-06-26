@@ -44,6 +44,20 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Stream<CurrencyRate?> watchSavedCurrencyWithRate() {
+    final query = select(savedCurrencies).join([
+      innerJoin(
+        currencyRates,
+        currencyRates.code.equalsExp(savedCurrencies.code),
+      ),
+    ])..limit(1);
+
+    return query.watch().map((rows) {
+      if (rows.isEmpty) return null;
+      return rows.first.readTable(currencyRates);
+    });
+  }
+
   Future<DateTime?> getLastUpdated() async {
     final query = selectOnly(currencyRates)
       ..addColumns([currencyRates.updatedAt])

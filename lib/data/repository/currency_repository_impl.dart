@@ -52,18 +52,15 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
   }
 
   @override
-  Future<CurrencyRate?> getSavedCurrency() async {
-    final saved = await _db.getSavedCurrency();
-    if (saved == null) return null;
-    final rates = await _db.watchAllRates().first;
-    final matches = rates.where((r) => r.code == saved.code);
-    if (matches.isEmpty) return null;
-    final match = matches.first;
-    return CurrencyRate(
-      code: match.code,
-      rate: match.rate,
-      updatedAt: match.updatedAt,
-    );
+  Stream<CurrencyRate?> watchSavedCurrency() {
+    return _db.watchSavedCurrencyWithRate().map((row) {
+      if (row == null) return null;
+      return CurrencyRate(
+        code: row.code,
+        rate: row.rate,
+        updatedAt: row.updatedAt,
+      );
+    });
   }
 
   @override
