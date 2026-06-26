@@ -5,6 +5,8 @@ import '../core/constants/api_constants.dart';
 import '../data/local/database.dart';
 import '../data/repository/currency_repository_impl.dart';
 import '../domain/repository/currency_repository.dart';
+import '../presentation/bloc/calculator/calculator_cubit.dart';
+import '../presentation/bloc/rates/rates_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -27,4 +29,10 @@ Future<void> configureDependencies() async {
       dio: getIt<Dio>(),
     ),
   );
+
+  getIt.registerFactory<RatesBloc>(
+    () => RatesBloc(getIt<CurrencyRepository>()),
+  );
+
+  getIt.registerFactory<CalculatorCubit>(() => CalculatorCubit());
 }
