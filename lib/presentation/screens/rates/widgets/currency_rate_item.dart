@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../domain/model/currency_rate.dart';
 
 class CurrencyRateItem extends StatelessWidget {
@@ -24,7 +25,7 @@ class CurrencyRateItem extends StatelessWidget {
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,
         child: Text(
-          rate.code.substring(0, 2),
+          rate.code.length >= 2 ? rate.code.substring(0, 2) : rate.code,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
       ),
@@ -32,7 +33,7 @@ class CurrencyRateItem extends StatelessWidget {
         rate.code,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text('${rate.rate.toStringAsFixed(4)} per USD'),
+      subtitle: Text('${CurrencyFormatter.formatRate(rate.rate)} per USD'),
       trailing: IconButton(
         icon: Icon(
           isSaved ? Icons.star : Icons.star_border,

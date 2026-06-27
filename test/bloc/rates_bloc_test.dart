@@ -70,6 +70,26 @@ void main() {
     );
 
     blocTest<RatesBloc, RatesState>(
+      'emits RatesLoading then RatesError when network fails and cache is empty',
+      build: () {
+        when(() => mockRepo.fetchAndCacheRates()).thenAnswer((_) async => false);
+        when(() => mockRepo.watchAllRates())
+            .thenAnswer((_) => Stream.value([]));
+        when(() => mockRepo.watchSavedCurrency())
+            .thenAnswer((_) => Stream.value(null));
+        return RatesBloc(mockRepo);
+      },
+      act: (bloc) => bloc.add(const LoadRates()),
+      wait: const Duration(milliseconds: 100),
+      expect: () => [
+        const RatesLoading(),
+        const RatesError(
+            message:
+                'No data available. Please check your connection.'),
+      ],
+    );
+
+    blocTest<RatesBloc, RatesState>(
       'emits RatesLoaded with isRefreshing true then false on RefreshRates',
       build: () {
         when(() => mockRepo.fetchAndCacheRates()).thenAnswer((_) async => true);

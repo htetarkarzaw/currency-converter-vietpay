@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../domain/model/currency_rate.dart';
 
 class SavedCurrencyCard extends StatelessWidget {
@@ -42,7 +43,8 @@ class SavedCurrencyCard extends StatelessWidget {
     }
 
     final rate = 1 / savedCurrency!.rate;
-    final formatted = rate.toStringAsFixed(4);
+    final formatted = CurrencyFormatter.formatRate(rate);
+    final updated = lastUpdated;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -76,7 +78,7 @@ class SavedCurrencyCard extends StatelessWidget {
             Text(
               isUsingCache
                   ? 'Using cached data'
-                  : 'Updated ${DateFormat('HH:mm').format(lastUpdated!)}',
+                  : 'Updated ${updated == null ? '' : DateFormat('HH:mm').format(updated)}',
               style: const TextStyle(
                 color: Colors.white60,
                 fontSize: 12,

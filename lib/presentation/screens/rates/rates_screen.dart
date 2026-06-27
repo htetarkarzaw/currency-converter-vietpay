@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../di/injection.dart';
-import '../../../domain/repository/currency_repository.dart';
 import '../../bloc/rates/rates_bloc.dart';
+import '../../bloc/rates/rates_event.dart';
 import '../../bloc/rates/rates_state.dart';
 import 'widgets/currency_rate_item.dart';
 import 'widgets/saved_currency_card.dart';
@@ -20,17 +19,6 @@ class RatesScreen extends StatelessWidget {
         }
 
         if (state is RatesLoaded) {
-          final isoPattern = RegExp(r'^[A-Z]+$');
-          bool isIso(String code) =>
-              code.length == 3 && isoPattern.hasMatch(code);
-          final sortedRates = [...state.rates]
-            ..sort((a, b) {
-              final aIso = isIso(a.code);
-              final bIso = isIso(b.code);
-              if (aIso && !bIso) return -1;
-              if (!aIso && bIso) return 1;
-              return a.code.compareTo(b.code);
-            });
           return Column(
             children: [
               SavedCurrencyCard(
@@ -40,16 +28,16 @@ class RatesScreen extends StatelessWidget {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: sortedRates.length,
+                  itemCount: state.rates.length,
                   itemBuilder: (context, index) {
-                    final rate = sortedRates[index];
+                    final rate = state.rates[index];
                     final isSaved =
                         rate.code == state.savedCurrency?.code;
                     return CurrencyRateItem(
                       rate: rate,
                       isSaved: isSaved,
-                      onSaveToggle: () => getIt<CurrencyRepository>()
-                          .saveSelectedCurrency(rate.code),
+                      onSaveToggle: () => context.read<RatesBloc>()
+                          .add(SaveCurrencyEvent(rate.code)),
                     );
                   },
                 ),
@@ -59,7 +47,22 @@ class RatesScreen extends StatelessWidget {
         }
 
         if (state is RatesError) {
-          return Center(child: Text(state.message));
+          final colorScheme = Theme.of(context).colorScheme;
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off, size: 64, color: colorScheme.onSurfaceVariant),
+                const SizedBox(height: 16),
+                Text(state.message, textAlign: TextAlign.center),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => context.read<RatesBloc>().add(const LoadRates()),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         }
 
         return const SizedBox.shrink();

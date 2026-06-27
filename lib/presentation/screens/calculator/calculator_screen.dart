@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/utils/currency_formatter.dart';
 import '../../../di/injection.dart';
 import '../../../domain/model/currency_rate.dart';
 import '../../bloc/calculator/calculator_cubit.dart';
@@ -69,6 +70,7 @@ class _CalculatorView extends StatelessWidget {
                     to: to,
                     result: result,
                     rates: rates,
+                    initialAmount: calcState.amount,
                     onShowFromPicker: () => _showPicker(
                       context,
                       rates,
@@ -93,6 +95,7 @@ class _CalculatorView extends StatelessWidget {
                   to: to,
                   result: result,
                   rates: rates,
+                  initialAmount: calcState.amount,
                   onShowFromPicker: () => _showPicker(
                     context,
                     rates,
@@ -128,6 +131,7 @@ class _PortraitLayout extends StatelessWidget {
     required this.to,
     required this.result,
     required this.rates,
+    required this.initialAmount,
     required this.onShowFromPicker,
     required this.onShowToPicker,
     required this.onAmountChanged,
@@ -138,6 +142,7 @@ class _PortraitLayout extends StatelessWidget {
   final CurrencyRate? to;
   final double? result;
   final List<CurrencyRate> rates;
+  final double initialAmount;
   final VoidCallback onShowFromPicker;
   final VoidCallback onShowToPicker;
   final ValueChanged<String> onAmountChanged;
@@ -157,7 +162,7 @@ class _PortraitLayout extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Amount', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
-            _AmountInput(onChanged: onAmountChanged),
+            _AmountInput(onChanged: onAmountChanged, initialAmount: initialAmount),
             Center(child: _SwapButton(onSwap: onSwap)),
             Text('To', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
@@ -179,6 +184,7 @@ class _LandscapeLayout extends StatelessWidget {
     required this.to,
     required this.result,
     required this.rates,
+    required this.initialAmount,
     required this.onShowFromPicker,
     required this.onShowToPicker,
     required this.onAmountChanged,
@@ -189,6 +195,7 @@ class _LandscapeLayout extends StatelessWidget {
   final CurrencyRate? to;
   final double? result;
   final List<CurrencyRate> rates;
+  final double initialAmount;
   final VoidCallback onShowFromPicker;
   final VoidCallback onShowToPicker;
   final ValueChanged<String> onAmountChanged;
@@ -214,7 +221,7 @@ class _LandscapeLayout extends StatelessWidget {
                     Text('Amount',
                         style: Theme.of(context).textTheme.labelMedium),
                     const SizedBox(height: 8),
-                    _AmountInput(onChanged: onAmountChanged),
+                    _AmountInput(onChanged: onAmountChanged, initialAmount: initialAmount),
                   ],
                 ),
               ),
@@ -288,7 +295,11 @@ class _CurrencySelector extends StatelessWidget {
                 backgroundColor: colorScheme.primaryContainer,
                 foregroundColor: colorScheme.onPrimaryContainer,
                 child: Text(
-                  currency != null ? currency!.code.substring(0, 2) : '??',
+                  currency != null
+                      ? (currency!.code.length >= 2
+                          ? currency!.code.substring(0, 2)
+                          : currency!.code)
+                      : '??',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 12),
                 ),
@@ -315,17 +326,57 @@ class _CurrencySelector extends StatelessWidget {
   }
 }
 
-class _AmountInput extends StatelessWidget {
-  const _AmountInput({required this.onChanged});
+class _AmountInput extends StatefulWidget {
+  const _AmountInput({required this.onChanged, required this.initialAmount});
 
   final ValueChanged<String> onChanged;
+  final double initialAmount;
+
+  @override
+  State<_AmountInput> createState() => _AmountInputState();
+}
+
+class _AmountInputState extends State<_AmountInput> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.initialAmount != 1.0
+          ? widget.initialAmount.toString()
+          : '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(_AmountInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialAmount != widget.initialAmount) {
+      final newText =
+          widget.initialAmount == 1.0 ? '' : widget.initialAmount.toString();
+      if (_controller.text != newText) {
+        _controller.text = newText;
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: _controller.text.length),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return TextField(
+      controller: _controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      onChanged: onChanged,
+      onChanged: widget.onChanged,
       decoration: InputDecoration(
         hintText: '0.00',
         filled: true,
@@ -349,39 +400,51 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final container = BoxDecoration(
+      color: colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12),
+    );
+
+    if (result == null) {
+      return Container(
+        decoration: container,
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Text(
+            'Select currencies to convert',
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
+    final f = from!;
+    final t = to!;
+
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: container,
       padding: const EdgeInsets.all(20),
-      child: result == null
-          ? Center(
-              child: Text(
-                'Select currencies to convert',
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${result!.toStringAsFixed(2)} ${to!.code}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${CurrencyFormatter.formatAmount(result!)} ${t.code}',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '1 ${from!.code} = ${(to!.rate / from!.rate).toStringAsFixed(4)} ${to!.code}',
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '1 ${f.code} = ${CurrencyFormatter.formatRate(t.rate / f.rate)} ${t.code}',
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 13,
             ),
+          ),
+        ],
+      ),
     );
   }
 }

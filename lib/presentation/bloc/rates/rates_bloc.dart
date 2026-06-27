@@ -7,11 +7,24 @@ import 'rates_state.dart';
 
 class RatesBloc extends Bloc<RatesEvent, RatesState> {
   final CurrencyRepository _repository;
-  bool _networkFetchSucceeded = false;
+
+  static final _isoPattern = RegExp(r'^[A-Z]+$');
+  static bool _isIso(String code) =>
+      code.length == 3 && _isoPattern.hasMatch(code);
+
+  static List<CurrencyRate> _sorted(List<CurrencyRate> rates) =>
+      [...rates]..sort((a, b) {
+          final aIso = _isIso(a.code);
+          final bIso = _isIso(b.code);
+          if (aIso && !bIso) return -1;
+          if (!aIso && bIso) return 1;
+          return a.code.compareTo(b.code);
+        });
 
   RatesBloc(this._repository) : super(const RatesInitial()) {
     on<LoadRates>(_onLoadRates);
     on<RefreshRates>(_onRefreshRates);
+    on<SaveCurrencyEvent>(_onSaveCurrency);
   }
 
   Future<void> _onLoadRates(
@@ -19,21 +32,31 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
     Emitter<RatesState> emit,
   ) async {
     emit(const RatesLoading());
-    _networkFetchSucceeded = await _repository.fetchAndCacheRates();
+    final networkSucceeded = await _repository.fetchAndCacheRates();
+
+    if (!networkSucceeded) {
+      final cached = await _repository.watchAllRates().first;
+      if (cached.isEmpty) {
+        emit(const RatesError(
+            message: 'No data available. Please check your connection.'));
+        return;
+      }
+    }
 
     await Future.wait([
       emit.forEach<List<CurrencyRate>>(
         _repository.watchAllRates(),
         onData: (rates) {
+          final sorted = _sorted(rates);
           final lastUpdated =
-              rates.isNotEmpty ? rates.first.updatedAt : null;
+              sorted.isNotEmpty ? sorted.first.updatedAt : null;
           final saved =
               state is RatesLoaded ? (state as RatesLoaded).savedCurrency : null;
           return RatesLoaded(
-            rates: rates,
+            rates: sorted,
             savedCurrency: saved,
             lastUpdated: lastUpdated,
-            isUsingCache: !_networkFetchSucceeded,
+            isUsingCache: !networkSucceeded,
           );
         },
       ),
@@ -45,11 +68,18 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
             rates: current?.rates ?? const [],
             savedCurrency: saved,
             lastUpdated: current?.lastUpdated,
-            isUsingCache: !_networkFetchSucceeded,
+            isUsingCache: !networkSucceeded,
           );
         },
       ),
     ]);
+  }
+
+  Future<void> _onSaveCurrency(
+    SaveCurrencyEvent event,
+    Emitter<RatesState> emit,
+  ) async {
+    await _repository.saveSelectedCurrency(event.code);
   }
 
   Future<void> _onRefreshRates(
@@ -67,7 +97,7 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
       isRefreshing: true,
     ));
 
-    _networkFetchSucceeded = await _repository.fetchAndCacheRates();
+    final networkSucceeded = await _repository.fetchAndCacheRates();
 
     if (state is RatesLoaded) {
       final after = state as RatesLoaded;
@@ -75,7 +105,7 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
         rates: after.rates,
         savedCurrency: after.savedCurrency,
         lastUpdated: after.lastUpdated,
-        isUsingCache: !_networkFetchSucceeded,
+        isUsingCache: !networkSucceeded,
         isRefreshing: false,
       ));
     }

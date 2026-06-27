@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/currency_formatter.dart';
 import '../../../domain/model/currency_rate.dart';
 
 class CurrencyPickerBottomSheet extends StatefulWidget {
@@ -76,7 +77,7 @@ class _CurrencyPickerBottomSheetState
                       rate.code,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('${rate.rate.toStringAsFixed(4)} per USD'),
+                    subtitle: Text('${CurrencyFormatter.formatRate(rate.rate)} per USD'),
                     onTap: () => Navigator.pop(context, rate),
                   );
                 },

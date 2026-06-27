@@ -17,3 +17,11 @@ class RefreshRates extends RatesEvent {
   @override
   List<Object?> get props => [];
 }
+
+class SaveCurrencyEvent extends RatesEvent {
+  final String code;
+  const SaveCurrencyEvent(this.code);
+
+  @override
+  List<Object?> get props => [code];
+}
