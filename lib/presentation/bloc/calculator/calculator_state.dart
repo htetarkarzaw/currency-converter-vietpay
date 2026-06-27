@@ -1,35 +1,28 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/model/currency_rate.dart';
-
 class CalculatorState extends Equatable {
-  final CurrencyRate? fromCurrency;
-  final CurrencyRate? toCurrency;
+  final String? fromCurrencyCode;
+  final String? toCurrencyCode;
   final double amount;
-  final double? result;
 
   const CalculatorState({
-    this.fromCurrency,
-    this.toCurrency,
+    this.fromCurrencyCode,
+    this.toCurrencyCode,
     this.amount = 1.0,
-    this.result,
   });
 
   CalculatorState copyWith({
-    CurrencyRate? fromCurrency,
-    CurrencyRate? toCurrency,
+    String? fromCurrencyCode,
+    String? toCurrencyCode,
     double? amount,
-    double? result,
-    bool clearResult = false,
   }) {
     return CalculatorState(
-      fromCurrency: fromCurrency ?? this.fromCurrency,
-      toCurrency: toCurrency ?? this.toCurrency,
+      fromCurrencyCode: fromCurrencyCode ?? this.fromCurrencyCode,
+      toCurrencyCode: toCurrencyCode ?? this.toCurrencyCode,
       amount: amount ?? this.amount,
-      result: clearResult ? null : result ?? this.result,
     );
   }
 
   @override
-  List<Object?> get props => [fromCurrency, toCurrency, amount, result];
+  List<Object?> get props => [fromCurrencyCode, toCurrencyCode, amount];
 }
