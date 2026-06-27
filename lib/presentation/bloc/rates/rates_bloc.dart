@@ -7,6 +7,7 @@ import 'rates_state.dart';
 
 class RatesBloc extends Bloc<RatesEvent, RatesState> {
   final CurrencyRepository _repository;
+  bool _networkFetchSucceeded = false;
 
   RatesBloc(this._repository) : super(const RatesInitial()) {
     on<LoadRates>(_onLoadRates);
@@ -18,7 +19,7 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
     Emitter<RatesState> emit,
   ) async {
     emit(const RatesLoading());
-    await _repository.fetchAndCacheRates();
+    _networkFetchSucceeded = await _repository.fetchAndCacheRates();
 
     await Future.wait([
       emit.forEach<List<CurrencyRate>>(
@@ -32,7 +33,7 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
             rates: rates,
             savedCurrency: saved,
             lastUpdated: lastUpdated,
-            isUsingCache: lastUpdated != null,
+            isUsingCache: !_networkFetchSucceeded,
           );
         },
       ),
@@ -44,7 +45,7 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
             rates: current?.rates ?? const [],
             savedCurrency: saved,
             lastUpdated: current?.lastUpdated,
-            isUsingCache: current?.lastUpdated != null,
+            isUsingCache: !_networkFetchSucceeded,
           );
         },
       ),
@@ -55,6 +56,28 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
     RefreshRates event,
     Emitter<RatesState> emit,
   ) async {
-    await _repository.fetchAndCacheRates();
+    if (state is! RatesLoaded) return;
+
+    final before = state as RatesLoaded;
+    emit(RatesLoaded(
+      rates: before.rates,
+      savedCurrency: before.savedCurrency,
+      lastUpdated: before.lastUpdated,
+      isUsingCache: before.isUsingCache,
+      isRefreshing: true,
+    ));
+
+    _networkFetchSucceeded = await _repository.fetchAndCacheRates();
+
+    if (state is RatesLoaded) {
+      final after = state as RatesLoaded;
+      emit(RatesLoaded(
+        rates: after.rates,
+        savedCurrency: after.savedCurrency,
+        lastUpdated: after.lastUpdated,
+        isUsingCache: !_networkFetchSucceeded,
+        isRefreshing: false,
+      ));
+    }
   }
 }

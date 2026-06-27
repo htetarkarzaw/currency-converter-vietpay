@@ -29,7 +29,7 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
   }
 
   @override
-  Future<void> fetchAndCacheRates() async {
+  Future<bool> fetchAndCacheRates() async {
     try {
       final response = await _dio.get(
         '$baseUrl/rates/latest',
@@ -48,7 +48,10 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
           )
           .toList();
       await _db.upsertRates(companions);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override

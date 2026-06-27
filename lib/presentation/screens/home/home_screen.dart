@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../di/injection.dart';
 import '../../bloc/rates/rates_bloc.dart';
 import '../../bloc/rates/rates_event.dart';
+import '../../bloc/rates/rates_state.dart';
 import '../calculator/calculator_screen.dart';
 import '../rates/rates_screen.dart';
 
@@ -35,10 +36,22 @@ class _HomeViewState extends State<_HomeView> {
       appBar: AppBar(
         title: const Text('Currency Converter'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () =>
-                context.read<RatesBloc>().add(const RefreshRates()),
+          BlocBuilder<RatesBloc, RatesState>(
+            builder: (context, state) {
+              if (state is RatesLoaded && state.isRefreshing) {
+                return const SizedBox(
+                  width: 48,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+              return IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () =>
+                    context.read<RatesBloc>().add(const RefreshRates()),
+              );
+            },
           ),
         ],
       ),

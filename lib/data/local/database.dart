@@ -38,10 +38,12 @@ class AppDatabase extends _$AppDatabase {
       (select(savedCurrencies)..limit(1)).getSingleOrNull();
 
   Future<void> upsertSavedCurrency(String code) async {
-    await delete(savedCurrencies).go();
-    await into(savedCurrencies).insert(
-      SavedCurrenciesCompanion.insert(code: code),
-    );
+    await transaction(() async {
+      await delete(savedCurrencies).go();
+      await into(savedCurrencies).insert(
+        SavedCurrenciesCompanion.insert(code: code),
+      );
+    });
   }
 
   Stream<CurrencyRate?> watchSavedCurrencyWithRate() {

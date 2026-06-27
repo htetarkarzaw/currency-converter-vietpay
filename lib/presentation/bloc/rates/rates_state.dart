@@ -25,16 +25,19 @@ class RatesLoaded extends RatesState {
   final CurrencyRate? savedCurrency;
   final DateTime? lastUpdated;
   final bool isUsingCache;
+  final bool isRefreshing;
 
   const RatesLoaded({
     required this.rates,
     required this.savedCurrency,
     required this.lastUpdated,
     required this.isUsingCache,
+    this.isRefreshing = false,
   });
 
   @override
-  List<Object?> get props => [rates, savedCurrency, lastUpdated, isUsingCache];
+  List<Object?> get props =>
+      [rates, savedCurrency, lastUpdated, isUsingCache, isRefreshing];
 }
 
 class RatesError extends RatesState {
