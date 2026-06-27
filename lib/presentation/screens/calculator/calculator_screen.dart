@@ -337,31 +337,14 @@ class _AmountInput extends StatefulWidget {
 }
 
 class _AmountInputState extends State<_AmountInput> {
-  late final TextEditingController _controller;
+  late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(
-      text: widget.initialAmount != 1.0
-          ? widget.initialAmount.toString()
-          : '',
+      text: widget.initialAmount == 1.0 ? '' : widget.initialAmount.toString(),
     );
-  }
-
-  @override
-  void didUpdateWidget(_AmountInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialAmount != widget.initialAmount) {
-      final newText =
-          widget.initialAmount == 1.0 ? '' : widget.initialAmount.toString();
-      if (_controller.text != newText) {
-        _controller.text = newText;
-        _controller.selection = TextSelection.fromPosition(
-          TextPosition(offset: _controller.text.length),
-        );
-      }
-    }
   }
 
   @override
