@@ -162,7 +162,9 @@ class _PortraitLayout extends StatelessWidget {
             Text('To', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             _CurrencySelector(currency: to, onTap: onShowToPicker),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            Text('Result', style: Theme.of(context).textTheme.labelMedium),
+            const SizedBox(height: 8),
             _ResultCard(from: from, to: to, result: result),
           ],
         ),
@@ -198,41 +200,61 @@ class _LandscapeLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('From',
-                      style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 8),
-                  _CurrencySelector(currency: from, onTap: onShowFromPicker),
-                  const SizedBox(height: 16),
-                  Text('Amount',
-                      style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 8),
-                  _AmountInput(onChanged: onAmountChanged),
-                  Center(child: _SwapButton(onSwap: onSwap)),
-                ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('From',
+                        style: Theme.of(context).textTheme.labelMedium),
+                    const SizedBox(height: 8),
+                    _CurrencySelector(currency: from, onTap: onShowFromPicker),
+                    const SizedBox(height: 16),
+                    Text('Amount',
+                        style: Theme.of(context).textTheme.labelMedium),
+                    const SizedBox(height: 8),
+                    _AmountInput(onChanged: onAmountChanged),
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+            SizedBox(
+              width: 48,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('To', style: Theme.of(context).textTheme.labelMedium),
-                  const SizedBox(height: 8),
-                  _CurrencySelector(currency: to, onTap: onShowToPicker),
                   const SizedBox(height: 24),
-                  _ResultCard(from: from, to: to, result: result),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 72,
+                    child: Center(
+                      child: _SwapButton(
+                          onSwap: onSwap, icon: Icons.swap_horiz),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('To',
+                        style: Theme.of(context).textTheme.labelMedium),
+                    const SizedBox(height: 8),
+                    _CurrencySelector(currency: to, onTap: onShowToPicker),
+                    const SizedBox(height: 16),
+                    Text('Result',
+                        style: Theme.of(context).textTheme.labelMedium),
+                    const SizedBox(height: 8),
+                    _ResultCard(from: from, to: to, result: result),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -365,14 +387,15 @@ class _ResultCard extends StatelessWidget {
 }
 
 class _SwapButton extends StatelessWidget {
-  const _SwapButton({required this.onSwap});
+  const _SwapButton({required this.onSwap, this.icon = Icons.swap_vert});
 
   final VoidCallback onSwap;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.swap_vert),
+      icon: Icon(icon),
       onPressed: onSwap,
     );
   }

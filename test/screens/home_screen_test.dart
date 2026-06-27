@@ -1,5 +1,6 @@
 import 'package:currency_converter/di/injection.dart';
 import 'package:currency_converter/domain/repository/currency_repository.dart';
+import 'package:currency_converter/main.dart';
 import 'package:currency_converter/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:currency_converter/presentation/bloc/rates/rates_bloc.dart';
 import 'package:currency_converter/presentation/screens/home/home_screen.dart';
@@ -13,6 +14,7 @@ void main() {
   late MockCurrencyRepository mockRepo;
 
   setUp(() {
+    themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
     mockRepo = MockCurrencyRepository();
     when(() => mockRepo.watchAllRates()).thenAnswer((_) => Stream.value([]));
     when(() => mockRepo.watchSavedCurrency())
@@ -23,7 +25,10 @@ void main() {
     getIt.registerFactory<CalculatorCubit>(() => CalculatorCubit());
   });
 
-  tearDown(() => getIt.reset());
+  tearDown(() {
+    themeNotifier.dispose();
+    getIt.reset();
+  });
 
   Widget buildSubject() => const MaterialApp(home: HomeScreen());
 

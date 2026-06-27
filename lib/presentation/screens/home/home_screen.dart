@@ -51,6 +51,7 @@ class _HomeViewState extends State<_HomeView> {
                 ),
                 onPressed: () => showModalBottomSheet(
                   context: context,
+                  isScrollControlled: true,
                   builder: (_) => ThemePickerBottomSheet(
                     currentTheme: themeNotifier.value,
                   ),

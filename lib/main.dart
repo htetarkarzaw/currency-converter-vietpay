@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'di/injection.dart';
 import 'presentation/screens/home/home_screen.dart';
 import 'presentation/theme/app_theme.dart';
 
-final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+late ValueNotifier<ThemeMode> themeNotifier;
+
+Future<ThemeMode> _loadTheme() async {
+  final prefs = await SharedPreferences.getInstance();
+  return switch (prefs.getString('theme_mode')) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
+  final savedTheme = await _loadTheme();
+  themeNotifier = ValueNotifier<ThemeMode>(savedTheme);
   runApp(const CurrencyConverterApp());
 }
 

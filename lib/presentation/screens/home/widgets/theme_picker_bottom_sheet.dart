@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/theme_prefs.dart';
 import '../../../../main.dart';
 
 class ThemePickerBottomSheet extends StatelessWidget {
@@ -12,7 +13,7 @@ class ThemePickerBottomSheet extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 16;
 
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -80,6 +81,7 @@ class _ThemeOption extends StatelessWidget {
       trailing: isSelected ? Icon(Icons.check, color: colorScheme.primary) : null,
       onTap: () {
         themeNotifier.value = mode;
+        saveTheme(mode);
         Navigator.pop(context);
       },
     );
