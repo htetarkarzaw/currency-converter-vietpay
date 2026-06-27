@@ -90,6 +90,19 @@ void main() {
     );
 
     blocTest<RatesBloc, RatesState>(
+      'calls saveSelectedCurrency when SaveCurrencyEvent is added',
+      build: () {
+        when(() => mockRepo.saveSelectedCurrency(any()))
+            .thenAnswer((_) async {});
+        return RatesBloc(mockRepo);
+      },
+      act: (bloc) => bloc.add(const SaveCurrencyEvent('JPY')),
+      verify: (_) {
+        verify(() => mockRepo.saveSelectedCurrency('JPY')).called(1);
+      },
+    );
+
+    blocTest<RatesBloc, RatesState>(
       'emits RatesLoaded with isRefreshing true then false on RefreshRates',
       build: () {
         when(() => mockRepo.fetchAndCacheRates()).thenAnswer((_) async => true);

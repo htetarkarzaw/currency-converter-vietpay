@@ -69,7 +69,6 @@ class _CalculatorView extends StatelessWidget {
                     from: from,
                     to: to,
                     result: result,
-                    rates: rates,
                     initialAmount: calcState.amount,
                     onShowFromPicker: () => _showPicker(
                       context,
@@ -85,7 +84,7 @@ class _CalculatorView extends StatelessWidget {
                     ),
                     onAmountChanged: (value) => context
                         .read<CalculatorCubit>()
-                        .setAmount(double.tryParse(value) ?? 0),
+                        .setAmount(double.tryParse(value) ?? 1.0),
                     onSwap: () =>
                         context.read<CalculatorCubit>().swapCurrencies(),
                   );
@@ -94,7 +93,6 @@ class _CalculatorView extends StatelessWidget {
                   from: from,
                   to: to,
                   result: result,
-                  rates: rates,
                   initialAmount: calcState.amount,
                   onShowFromPicker: () => _showPicker(
                     context,
@@ -110,7 +108,7 @@ class _CalculatorView extends StatelessWidget {
                   ),
                   onAmountChanged: (value) => context
                       .read<CalculatorCubit>()
-                      .setAmount(double.tryParse(value) ?? 0),
+                      .setAmount(double.tryParse(value) ?? 1.0),
                   onSwap: () =>
                       context.read<CalculatorCubit>().swapCurrencies(),
                 );
@@ -130,7 +128,6 @@ class _PortraitLayout extends StatelessWidget {
     required this.from,
     required this.to,
     required this.result,
-    required this.rates,
     required this.initialAmount,
     required this.onShowFromPicker,
     required this.onShowToPicker,
@@ -141,7 +138,6 @@ class _PortraitLayout extends StatelessWidget {
   final CurrencyRate? from;
   final CurrencyRate? to;
   final double? result;
-  final List<CurrencyRate> rates;
   final double initialAmount;
   final VoidCallback onShowFromPicker;
   final VoidCallback onShowToPicker;
@@ -183,7 +179,6 @@ class _LandscapeLayout extends StatelessWidget {
     required this.from,
     required this.to,
     required this.result,
-    required this.rates,
     required this.initialAmount,
     required this.onShowFromPicker,
     required this.onShowToPicker,
@@ -194,7 +189,6 @@ class _LandscapeLayout extends StatelessWidget {
   final CurrencyRate? from;
   final CurrencyRate? to;
   final double? result;
-  final List<CurrencyRate> rates;
   final double initialAmount;
   final VoidCallback onShowFromPicker;
   final VoidCallback onShowToPicker;

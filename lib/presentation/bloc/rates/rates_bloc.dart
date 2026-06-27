@@ -48,8 +48,9 @@ class RatesBloc extends Bloc<RatesEvent, RatesState> {
         _repository.watchAllRates(),
         onData: (rates) {
           final sorted = _sorted(rates);
-          final lastUpdated =
-              sorted.isNotEmpty ? sorted.first.updatedAt : null;
+          final lastUpdated = sorted.isNotEmpty
+              ? sorted.map((r) => r.updatedAt).reduce((a, b) => a.isAfter(b) ? a : b)
+              : null;
           final saved =
               state is RatesLoaded ? (state as RatesLoaded).savedCurrency : null;
           return RatesLoaded(

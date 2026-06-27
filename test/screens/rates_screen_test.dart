@@ -33,7 +33,6 @@ void main() {
 
     getIt.registerFactory<RatesBloc>(() => ratesBloc);
     getIt.registerFactory<CalculatorCubit>(() => CalculatorCubit());
-    getIt.registerLazySingleton<CurrencyRepository>(() => mockRepo);
   });
 
   tearDown(() {
