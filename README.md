@@ -8,9 +8,17 @@ Built with Flutter, Clean Architecture, and BLoC state management.
 
 ## Screenshots
 
-| Rates Screen                                 | Calculator                                         | Currency Picker                                       | Calculator Empty                                         |
-|----------------------------------------------|----------------------------------------------------|-------------------------------------------------------|----------------------------------------------------------|
-| ![Rates Screen](screenshots/rate_screen.png) | ![Calculator](screenshots/calculator_screen_2.png) | ![Currency Picker](screenshots/currency_selector.png) | ![Calculator Empty](screenshots/calculator_screen_1.png) |
+### Phone
+
+| Rates Screen | Calculator | Currency Picker | Dark Mode |
+|---|---|---|---|
+| ![Rates](screenshots/rate_screen.png) | ![Calculator](screenshots/calculator_screen_2.png) | ![Currency Picker](screenshots/currency_selector.png) | ![Dark Mode](screenshots/dark_mode.png) |
+
+### Tablet & Features
+
+| Tablet Rates | Tablet Calculator | Theme Picker |
+|---|---|---|
+| ![Tablet Rates](screenshots/tablet_rate.png) | ![Tablet Calculator](screenshots/tablet_calculator.png) | ![Theme Picker](screenshots/theme_picker.png) |
 
 ## Architecture
 
@@ -57,6 +65,10 @@ This means the app is usable immediately after first install (once data is cache
 - **Dual-stream RatesBloc with `Future.wait`** — `watchAllRates()` and `watchSavedCurrency()` are subscribed to concurrently via `Future.wait([emit.forEach(...), emit.forEach(...)])`. Each `onData` reads the latest `state` to preserve the other stream's value, so neither subscription clobbers the other.
 
 - **`fetchAndCacheRates()` returns `bool`** — instead of a silent `void`, the method returns `true` on success and `false` on catch. `RatesBloc` uses this to set `isUsingCache` accurately and to show a "cached data" badge in the UI when the last network attempt failed.
+
+- **Responsive layout** — `CalculatorScreen` uses `OrientationBuilder` to switch between a single-column portrait layout and a two-column landscape layout, sharing extracted widgets (`_CurrencySelector`, `_AmountInput`, `_ResultCard`) with zero duplication.
+
+- **Theme persistence** — Selected theme (Light/Dark/System) is persisted via `SharedPreferences` and restored on next launch, with no flash of wrong theme on startup.
 
 ## Setup
 
