@@ -20,6 +20,20 @@ Clean Architecture: data / domain / presentation
 - Single source of truth: Drift only, never read from network in UI
 - Every Bloc must have a corresponding bloc_test file
 
+## Bloc Anti-Pattern Rules
+- NEVER call context.read() inside build() method — only in callbacks (onTap, onPressed, onChanged)
+- NEVER call context.watch() or context.read() inside initState or dispose
+- Use BlocListener for side effects (navigation, snackbars), BlocBuilder for UI
+- Use BlocSelector when only one field from state is needed — avoids unnecessary rebuilds
+- StatefulWidget only allowed for: animation controllers, text/focus controllers, page controllers
+- _currentIndex in HomeScreen is acceptable as StatefulWidget — everything else must be StatelessWidget + Bloc
+
+## Testing Rules
+- Every Bloc must have a corresponding bloc_test file in test/bloc/
+- Every screen must have a widget smoke test in test/screens/
+- Use mocktail for mocking dependencies
+- Test file naming: rates_bloc_test.dart, calculator_cubit_test.dart
+
 ## Git Rules
 - Always stage new files with git add after creating them
 - DO NOT commit or push automatically — wait for explicit instruction
