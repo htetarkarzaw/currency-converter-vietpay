@@ -105,7 +105,6 @@ class _CalculatorView extends StatelessWidget {
 
         return BlocBuilder<CalculatorCubit, CalculatorState>(
           builder: (context, calcState) {
-            final cubit = context.read<CalculatorCubit>();
             final from = _lookup(rates, calcState.fromCurrencyCode);
             final to = _lookup(rates, calcState.toCurrencyCode);
             final result = from != null && to != null
@@ -128,7 +127,8 @@ class _CalculatorView extends StatelessWidget {
                       onTap: () => _showPicker(
                         context,
                         rates,
-                        cubit.setFromCurrency,
+                        (code) =>
+                            context.read<CalculatorCubit>().setFromCurrency(code),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -140,8 +140,9 @@ class _CalculatorView extends StatelessWidget {
                     TextField(
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true),
-                      onChanged: (value) =>
-                          cubit.setAmount(double.tryParse(value) ?? 0),
+                      onChanged: (value) => context
+                          .read<CalculatorCubit>()
+                          .setAmount(double.tryParse(value) ?? 0),
                       decoration: InputDecoration(
                         hintText: '0.00',
                         filled: true,
@@ -157,7 +158,8 @@ class _CalculatorView extends StatelessWidget {
                     Center(
                       child: IconButton(
                         icon: const Icon(Icons.swap_vert),
-                        onPressed: cubit.swapCurrencies,
+                        onPressed: () =>
+                            context.read<CalculatorCubit>().swapCurrencies(),
                       ),
                     ),
 
@@ -170,7 +172,8 @@ class _CalculatorView extends StatelessWidget {
                       onTap: () => _showPicker(
                         context,
                         rates,
-                        cubit.setToCurrency,
+                        (code) =>
+                            context.read<CalculatorCubit>().setToCurrency(code),
                       ),
                     ),
                     const SizedBox(height: 24),
